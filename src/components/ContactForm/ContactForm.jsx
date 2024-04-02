@@ -1,44 +1,74 @@
-import { useDispatch } from 'react-redux';
-import { addContact } from '../../redux/contactsSlice';
-import styles from './ContactForm.module.css';
-import { useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { nanoid } from "https://cdn.jsdelivr.net/npm/nanoid/nanoid.js";
+import * as Yup from "yup";
+import css from "./ContactForm.module.css";
+import { useDispatch } from "react-redux";
+import { addContact } from "../../redux/contactsOps";
+import toast from "react-hot-toast";
 
-const ContactForm = () => {
+export default function ContactForm() {
+  const idName = nanoid();
+  const idNumber = nanoid();
+
   const dispatch = useDispatch();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
 
-  const handlePhoneChange = (e) => {
-    const inputPhone = e.target.value.replace(/\D/g, '');
-    setPhone(inputPhone);
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    const id = uuidv4(); 
-    dispatch(addContact({ id, name, phone })); 
-    setName('');
-    setPhone('');
-  };
+  const validationSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(3, "Minimum number of characters - 3!")
+      .max(50, "The maximum number of characters is 50!")
+      .required("This field is required!"),
+    number: Yup.string()
+      .min(3, "Minimum number of characters - 3!")
+      .max(50, "The maximum number of characters is 50!")
+      .required("This field is required!"),
+  });
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-      />
-      <input
-        type="text"
-        placeholder="Phone"
-        value={phone}
-        onChange={handlePhoneChange}
-      />
-      <button type="submit">Add Contact</button>
-    </form>
-  );
-};
+    <Formik
+      validationSchema={validationSchema}
+      initialValues={{ name: "", number: "" }}
+      onSubmit={(e, { resetForm }) => {
+        dispatch(
+          addContact({
+            name: e.name,
+            number: e.number,
+            id: nanoid(),
+          })
+        )
+          .unwrap()
+          .then(() => {
+            toast.success(
+              "The contact has been successfully added to the list!"
+            );
+          });
+        resetForm();
+      }}
+    >
+      <Form className={css.form}>
+        <label className={css.label} htmlFor={idName}>
+          Name
+        </label>
+        <Field className={css.field} id={idName} name="name" />
+        <ErrorMessage
+          className={css.error}
+          name="name"
+          component="p"
+        ></ErrorMessage>
 
-export default ContactForm;
+        <label className={css.label} htmlFor={idNumber}>
+          Number
+        </label>
+        <Field className={css.field} id={idNumber} name="number" />
+        <ErrorMessage
+          className={css.error}
+          name="number"
+          component="p"
+        ></ErrorMessage>
+
+        <button className={css.btn} type="submit">
+          Submit
+        </button>
+      </Form>
+    </Formik>
+  );
+}

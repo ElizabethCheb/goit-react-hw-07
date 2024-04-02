@@ -1,20 +1,47 @@
-import PropTypes from 'prop-types';
-import styles from './Contact.module.css';
+import css from "./Contact.module.css";
+import { BsPersonHearts } from "react-icons/bs";
+import { FaPhoneSquareAlt } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { deleteContact } from "../../redux/contactsOps";
+import toast from "react-hot-toast";
 
-const Contact = ({ name, phone, onDelete }) => {
+export default function Contact({ data }) {
+  const dispatch = useDispatch();
+
   return (
-    <div className={styles.contact}>
-      <p>Name: {name}</p>
-      <p>Phone: {phone}</p>
-      <button onClick={onDelete}>Delete</button>
+    <div className={css.contact}>
+      <div>
+        <div className={css.container}>
+          <BsPersonHearts /> {data.name}
+          <h1 className={css.text}></h1>
+        </div>
+
+        <div className={css.container}>
+          <FaPhoneSquareAlt />
+          <p className={css.text}>{data.number}</p>
+        </div>
+      </div>
+
+      <button
+        onClick={() =>
+          dispatch(deleteContact(data.id))
+            .unwrap()
+            .then(() => {
+              toast(
+                "The contact has been successfully removed from the list!",
+                {
+                  icon: "📵",
+                }
+              );
+              // toast.success(
+              //   "The contact has been successfully removed from the list!"
+              // );
+            })
+        }
+        className={css.button}
+      >
+        Delete
+      </button>
     </div>
   );
-};
-
-Contact.propTypes = {
-  name: PropTypes.string.isRequired,
-  phone: PropTypes.string.isRequired,
-  onDelete: PropTypes.func.isRequired,
-};
-
-export default Contact;
+}
