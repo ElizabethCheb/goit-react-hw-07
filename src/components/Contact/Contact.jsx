@@ -33,9 +33,6 @@ export default function Contact({ data }) {
                   icon: "📵",
                 }
               );
-              // toast.success(
-              //   "The contact has been successfully removed from the list!"
-              // );
             })
         }
         className={css.button}
